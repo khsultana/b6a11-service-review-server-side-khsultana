@@ -21,6 +21,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const itemsCollection = client.db("SultanaKitchen").collection("FoodItems");
+    const orderCollection = client.db("SultanaKitchen").collection('orders')
     app.get("/items", async (req, res) => {
       const query = {};
       const cursor = itemsCollection.find(query);
@@ -34,6 +35,16 @@ async function run() {
       const item = await itemsCollection.findOne(query);
       res.send(item);
     });
+
+    // order API Item
+
+    app.post('/orderItem', async (req, res) => {
+
+      const order = req.body;
+      const result = await orderCollection.insertOne(order);
+      res.send(result)
+    })
+
   } finally {
   }
 }
