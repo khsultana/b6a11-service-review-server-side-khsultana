@@ -21,7 +21,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const itemsCollection = client.db("SultanaKitchen").collection("FoodItems");
-    const orderCollection = client.db("SultanaKitchen").collection('orders')
+    const orderCollection = client.db("SultanaKitchen").collection("orderItem");
     app.get("/items", async (req, res) => {
       const query = {};
       const cursor = itemsCollection.find(query);
@@ -37,14 +37,43 @@ async function run() {
     });
 
     // order API Item
+    app.get("/orders", async (req, res) => {
+      let query = {};
+      if (req.query.email) {
+        query = {
+          email: req.query.email,
+        };
+      }
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders);
+    });
 
-    app.post('/orderItem', async (req, res) => {
-
+    app.post("/orderItem", async (req, res) => {
       const order = req.body;
       const result = await orderCollection.insertOne(order);
-      res.send(result)
-    })
+      res.send(result);
+    });
 
+    app.patch("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const status = req.body.status;
+      const query = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: "status",
+        },
+      };
+      const result = await orderCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    });
   } finally {
   }
 }
